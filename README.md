@@ -1,2 +1,10 @@
-# ECSE425-w22-project-g8
-Pipelined processor project for ECSE 425 w22 group 8
+# ECSE 425 W22 Final Project Group 8
+
+This is the repo for the pipelined processor project for ECSE 425.
+
+## Members
+Aroomoogon, Krishna
+Cui, Bowen
+Güre, Kaan
+Mallek, Amine
+Willems, James
