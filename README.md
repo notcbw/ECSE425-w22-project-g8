@@ -25,6 +25,6 @@ Willems, James
 | 3.3 | TBA |
 | 3.4 | TBA |
 | Report | Everyone |
-| Bonus | If possible |
+| Bonus | TBA |
 
 
