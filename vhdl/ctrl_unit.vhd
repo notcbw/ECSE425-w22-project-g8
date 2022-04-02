@@ -24,38 +24,34 @@ entity ctrl_unit is
 end ctrl_unit;
 
 architecture rtl of ctrl_unit is
-	signal op_funct: std_logic_vector(11 downto 0);
-	signal ex: std_logic := '0';		-- unknown instruction flag
 	signal beq: std_logic := '0';
 	signal bne: std_logic := '0'; 
 begin
 	-- control logic, asynchoronus
 	-- alu control signal
-	op_funct <= op & funct;	-- concatenate op and funct for case
-	with op_funct select
-	alu_mode <= add when "000000100000",	-- add
-				add when "001000XXXXXX",	-- addi
-				add when "100011XXXXXX",	-- lw
-				add when "101011XXXXXX",	-- sw
-				sub when "000000100010",	-- sub
-				multiply when "000000011000",	-- mult
-				divide when "000000011010",		-- div
-				slt when "001010XXXXXX",	-- slti
-				slt when "000000101010",	-- slt
-				alu_and when "001100XXXXXX",	-- andi
-				alu_and when "000000100100",	-- and
-				alu_or when "001101XXXXXX",	-- ori
-				alu_or when "000000100101",	-- or
-				alu_nor when "000000100111",	-- nor
-				alu_xor when "001110XXXXXX",	-- xori
-				alu_xor when "000000100110",	-- xor
-				mfhi when "000000010000",	-- mfhi
-				mflo when "000000010010",	-- mflo
-				alu_sll when "000000000000",	-- sll
-				alu_srl when "000000000010",	-- srl
-				alu_sra when "000000000011",	-- sra
-				lui when "001111XXXXXX",	-- lui
-				nop when others;
+	alu_mode <=	add when (op="000000") and (funct="100000") else	-- add
+				add when (op="001000") else	-- addi
+				add when (op="100011") else	-- lw
+				add when (op="101011") else	-- sw
+				sub when (op="000000") and (funct="100010") else	-- sub
+				multiply when (op="000000") and (funct="011000") else	-- mult
+				divide when (op="000000") and (funct="011010") else		-- div
+				slt when (op="001010") else	-- slti
+				slt when (op="000000") and (funct="101010") else	-- slt
+				alu_and when (op="001100") else	-- andi
+				alu_and when (op="000000") and (funct="100100") else	-- and
+				alu_or when (op="001101") else	-- ori
+				alu_or when (op="000000") and (funct="100101") else	-- or
+				alu_nor when (op="000000") and (funct="100111") else	-- nor
+				alu_xor when (op="001110") else	-- xori
+				alu_xor when (op="000000") and (funct="100110") else	-- xor
+				mfhi when (op="000000") and (funct="010000") else	-- mfhi
+				mflo when (op="000000") and (funct="010010") else	-- mflo
+				alu_sll when (op="000000") and (funct="000000") else	-- sll
+				alu_srl when (op="000000") and (funct="000010") else	-- srl
+				alu_sra when (op="000000") and (funct="000011") else	-- sra
+				lui when (op="001111") else	-- lui
+				nop;
 				
 	-- jump --
 	with op select
@@ -83,7 +79,7 @@ begin
 	-- reg_write, instructions that need writeback
 	with op select
 	reg_write <=	'1' when "000000",
-					'1' when "001001",	-- addi
+					'1' when "001000",	-- addi
 					'1' when "001010",	-- slti
 					'1' when "001100",	-- andi
 					'1' when "001101",	-- ori

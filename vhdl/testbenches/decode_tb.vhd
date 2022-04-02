@@ -215,8 +215,6 @@ begin
 		wait until rising_edge(clk);
 		reg_write_w <= '0';
 		inst <= "000000" & "00011" & "00011" & "00011" & "00000" & "100000";	-- add r3, r3, r3
-		fwd1 <= '0';
-		fwd2 <= '0';
 		wait until rising_edge(clk);
 		-- decode stage of add r3, r3, r3
 		wait until rising_edge(clk);
@@ -262,8 +260,6 @@ begin
 		wait until rising_edge(clk);
 		reg_write_w <= '0';
 		inst <= "000000" & "00011" & "00011" & "00011" & "00000" & "100000";	-- add r3, r3, r3
-		fwd1 <= '0';
-		fwd2 <= '0';
 		wait until rising_edge(clk);
 		-- decode stage of add r3, r3, r3
 		wait until rising_edge(clk);
@@ -273,19 +269,33 @@ begin
 		wait until rising_edge(clk);
 		--decode stage of add r4, r3, r3
 		wait until rising_edge(clk);
-		assert reg_eq = '1' report "Decode test 07 failed, eq asserted when two operands are not equal" severity error;
+		assert reg_eq = '0' report "Decode test 07 failed, eq asserted when two operands are not equal" severity error;
 		
 		-- forwarding mux: switch between register values and forwarded value
-		inst <= "000000" & "00011" & "00011" & "00011" & "00000" & "100000";	-- add r3, r3, r3
+		inst <= "000000" & "00011" & "00100" & "00011" & "00000" & "100000";	-- add r3, r3, r4
 		fwd_in <= x"abbbbbbb";
-		fwd1 <= '1';
-		fwd2 <= '0';
+		-- simulate forwarding from memory stage
+		reg_write_m <= '1';
+		write_reg_m <= "00011";
+		wait until rising_edge(clk);
 		wait until rising_edge(clk);
 		assert rd1_2 = x"abbbbbbb" report "Decode test 08 failed, rd1 output is not the forwarded value." severity error;
-		fwd1 <= '0';
-		fwd2 <= '1';
-		assert rd1_2 = x"deadbeef" report "Decode test 09 failed, rd1 output is not the value from the register" severity error;
-		assert rd2_2 = x"abbbbbbb" report "Decode test 10 failed, rd2 output is not the forwarded value." severity error;
+		assert rd2_2 = x"12345678" report "Decode test 09 failed, rd2 output is not the value from the register" severity error;
+		-- simulate forwarding from memory stage
+		write_reg_m <= "00100";
+		wait until rising_edge(clk);
+		wait until rising_edge(clk);
+		assert rd1_2 = x"deadbeef" report "Decode test 10 failed, rd1 output is not the value from the register" severity error;
+		assert rd2_2 = x"abbbbbbb" report "Decode test 11 failed, rd2 output is not the forwarded value." severity error;
+		reg_write_m <= '0';
+		
+		-- detection for data dependencies
+		inst <= "000000" & "00011" & "00100" & "00011" & "00000" & "100000";	-- add r3, r3, r4
+		reg_write_e <= '1';
+		write_reg_e <= "00011";
+		wait until rising_edge(clk);
+		wait until rising_edge(clk);
+		assert stall_f = '1' report "Decode test 12 failed, pipeline is not stalled when there is a data dependency." severity error;
 		
 		-- automatically terminate test.
 		wait until rising_edge(clk);
