@@ -46,6 +46,8 @@ entity fetch is
                     s_addr_inst <= pc_internal;
                     s_read_inst <= '1';
                     pc_internal <= std_logic_vector(to_unsigned( to_integer(unsigned(pc_internal)) + 4,32));
+                else
+                    inst <= x"00000020"; -- stall by sending 0+0=0
                 end if;
             end if;
 
