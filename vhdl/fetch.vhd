@@ -1,4 +1,7 @@
 -- fetch
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.numeric_std.all;
 
 entity fetch is
 	port(
@@ -25,25 +28,30 @@ entity fetch is
         signal pc_reset: unsigned(31 downto 0) := "00000000000000000000000000000000";
     begin
 
-        process(rising_edge(clk))
+        process(clk, s_waitrequest_inst)
+        begin
+            if (rising_edge(clk)) then
+                s_read_inst <= '0'; --reset the read signal
+                if (reset = '1') then
+                    pc_internal <= std_logic_vector(pc_reset);
 
-            s_read_inst <= '0'; --reset the read signal
-            if (reset = '1') then
-                pc_internal <= std_logic_vector(pc_reset);
+                elsif (stall = '1') then
+                    inst <= x"00000020"; -- stall by sending 0+0=0
 
-            elsif (stall = '1') then
-                inst <= x"00000020"; -- stall by sending 0+0=0
-
-            elsif (branch_taken = '1') then
-                pc_internal <= branch_addr;
-                --s_addr_inst <= branch_addr;
-                
-            elsif (branch_taken = '0') and (stall = '0') and (s_waitrequest_inst = '0') then
-                s_addr_inst <= pc_internal;
-                s_read_inst <= '1';
-                pc_internal <= std_logic_vector(to_unsigned( to_integer(unsigned(pc_internal)) + 4,32))
+                elsif (branch_taken = '1') then
+                    pc_internal <= branch_addr;
+                    --s_addr_inst <= branch_addr;
+                    
+                elsif (branch_taken = '0') and (stall = '0') and (s_waitrequest_inst = '0') then
+                    s_addr_inst <= pc_internal;
+                    s_read_inst <= '1';
+                    pc_internal <= std_logic_vector(to_unsigned( to_integer(unsigned(pc_internal)) + 4,32));
+                end if;
             end if;
 
             if (falling_edge(s_waitrequest_inst)) then --results from memory are ready
                 inst <= s_readdata_inst;
+            end if;
             pc <= pc_internal;
+        end process;
+    end arch;
