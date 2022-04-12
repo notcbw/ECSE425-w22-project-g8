@@ -16,8 +16,8 @@ entity fetch is
 		inst: out std_logic_vector(31 downto 0); --  send instruction to ID
 		s_waitrequest_inst: in std_logic :='0'; -- get waitrequest signal from cache
 		s_readdata_inst: in std_logic_vector(31 downto 0); -- get instruction from cache
-        mem_data_stall: in std_logic; 
-		ismiss: in std_logic := '0'
+        --mem_data_stall: in std_logic; 
+		--ismiss: in std_logic := '0'
 		
 	);
     end fetch;
