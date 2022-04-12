@@ -25,6 +25,6 @@ Willems, James
 | 3.3 | James |
 | 3.4 | Amine & Krishna |
 | Report | Everyone |
-| Bonus | ASAP |
+| Bonus | Everyone |
 
 

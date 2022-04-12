@@ -16,6 +16,8 @@ entity decode is
 			write_reg_m: in std_logic_vector(4 downto 0);
 			reg_write_w: in std_logic;
 			write_reg_w: in std_logic_vector(4 downto 0);
+			pc_in: in std_logic_vector(31 downto 0);
+			pc_out: out std_logic_vector(31 downto 0);
 			op: out std_logic_vector(5 downto 0);		-- opcode to control unit
 			funct: out std_logic_vector(5 downto 0);	-- funct to control unit
 			a1_out: out std_logic_vector(4 downto 0);	-- a1 to register file
@@ -67,12 +69,13 @@ begin
 	begin
 		if clk'event and clk='1' then
 			-- instruction decoding logic, affected by stalling
-			if (wait_dd='0') and (stall_d='0') then
+			if (wait_dd='0') then
 				-- simple decoding
 				op <= inst(31 downto 26);
 				funct <= inst(5 downto 0);
 				a1_out <= inst(25 downto 21);
 				a2_out <= inst(20 downto 16);
+				pc_out <= pc_in;
 				inst_buf <= inst;
 			end if;
 			
