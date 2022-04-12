@@ -15,7 +15,7 @@ entity fetch is
 		s_read_inst: out std_logic; -- send read signal to cache
 		inst: out std_logic_vector(31 downto 0); --  send instruction to ID
 		s_waitrequest_inst: in std_logic :='0'; -- get waitrequest signal from cache
-		s_readdata_inst: in std_logic_vector(31 downto 0); -- get instruction from cache
+		s_readdata_inst: in std_logic_vector(31 downto 0) -- get instruction from cache
         --mem_data_stall: in std_logic; 
 		--ismiss: in std_logic := '0'
 		
@@ -24,7 +24,7 @@ entity fetch is
 
     architecture arch of fetch is
         --pc_internal used for calculations
-        signal pc_internal: std_logic_vector(31 DOWNTO 0);
+        signal pc_internal: std_logic_vector(31 DOWNTO 0) := "00000000000000000000000000000000";
         signal pc_reset: unsigned(31 downto 0) := "00000000000000000000000000000000";
     begin
 
