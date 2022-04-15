@@ -1,4 +1,4 @@
-# runs the 1st test on the processor
+# runs a program on the processor
 proc AddWaves {} {
 	add wave -position end sim:/processor/clk
 	add wave -decimal -position end sim:/processor/pc_if_to_id

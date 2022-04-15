@@ -13,9 +13,9 @@ generic(
 );
 port(
 	clk: in std_logic;
-	initialise: in std_logic;
+	initialise: in std_logic;		-- not used?
 	reset: in std_logic;
-	write_to_text: in std_logic
+	write_to_text: in std_logic		-- reserved signal to write the contents of the memory to a file, not really used anymore
     );
 end processor;
     

@@ -28,7 +28,7 @@ Willems, James
 | Bonus | Team |
 
 ## Execution
-In the console of ModelSim: 
+Put the compiled program.txt in the root folder, then in the console of ModelSim: 
 ```
 cd <root of the project>   
 source run.tcl  

@@ -9,15 +9,15 @@ entity decode is
 			inst: in std_logic_vector(31 downto 0);
 			reg_dst: in std_logic;		-- from the control unit, 1 if writeback to Rd, 0 if Rt
 			jump: in std_logic;			-- from the control unit, 1 if it's a jump instruction
-			link: in std_logic;
+			link: in std_logic;			-- pretty obvious
 			sign_ext: in std_logic;		-- from the control unit. 1 if sign extend, 0 if zero extend
-			reg_write_e: in std_logic;
+			reg_write_e: in std_logic;	-- signals for hazard detection
 			write_reg_e: in std_logic_vector(4 downto 0);
 			reg_write_m: in std_logic;
 			write_reg_m: in std_logic_vector(4 downto 0);
 			reg_write_w: in std_logic;
 			write_reg_w: in std_logic_vector(4 downto 0);
-			pc_in: in std_logic_vector(31 downto 0);
+			pc_in: in std_logic_vector(31 downto 0);	-- pass PC from if to ex
 			pc_out: out std_logic_vector(31 downto 0);
 			op: out std_logic_vector(5 downto 0);		-- opcode to control unit
 			funct: out std_logic_vector(5 downto 0);	-- funct to control unit
@@ -48,7 +48,7 @@ begin
 				(x"0000" & inst_buf(15 downto 0));
 	
 	-- switching between link register and two writeback addresses
-	write_reg_out <= 	"11111" when link='1' else
+	write_reg_out <= 	"11111" when link='1' else	-- if link, write back go GPR(31)
 						inst_buf(15 downto 11) when reg_dst='1' else 
 						inst_buf(20 downto 16);
 	
@@ -71,51 +71,13 @@ begin
 	decode: process(clk)
 	begin
 		if clk'event and clk='1' then
-			-- instruction decoding logic, affected by stalling
-			--if (wait_dd='0') then
-				-- simple decoding
-				op <= inst(31 downto 26);
-				funct <= inst(5 downto 0);
-				a1_out <= inst(25 downto 21);
-				a2_out <= inst(20 downto 16);
-				pc_out <= pc_in;
-				inst_buf <= inst;
-			--end if;
-			
-			--~ if jump='0' then
-				-- if there is a data hazard, stall
-				--~ if reg_write_e='1' then
-					--~ -- check for data dependency
-					--~ if ((write_reg_e=inst(25 downto 21)) or (write_reg_e=inst(20 downto 16))) then
-						--~ -- data dependency detected, wait
-						--~ wait_dd <= '1';
-					--~ else
-						--~ wait_dd <= '0';
-					--~ end if;
-				--~ end if;
-
-				--~ -- resolving the data hazard, resume pipeline
-				--~ if reg_write_m='1' then
-					--~ -- forwarding for rd1
-					--~ if write_reg_m=inst(25 downto 21) then
-						--~ -- change rd1 mux output and stop waiting
-						--~ fwd1_out <= '1';
-						--~ wait_dd <= '0';
-					--~ else
-						--~ fwd1_out <= '0';
-					--~ end if;
-					--~ -- forwarding for rd2
-					--~ if write_reg_m=inst(20 downto 16) then
-						--~ -- change rd2 mux output and stop waiting
-						--~ fwd2_out <= '1';
-						--~ wait_dd <= '0';
-					--~ else
-						--~ fwd2_out <= '0';
-					--~ end if;
-				--~ end if;
-				
-			--~ end if;
-			
+			-- instruction decoding logic
+			op <= inst(31 downto 26);
+			funct <= inst(5 downto 0);
+			a1_out <= inst(25 downto 21);
+			a2_out <= inst(20 downto 16);
+			pc_out <= pc_in;
+			inst_buf <= inst;
 		end if;
 	end process;
 	
