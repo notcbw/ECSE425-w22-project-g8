@@ -341,6 +341,28 @@ signal alu_out_m: std_logic_vector(31 downto 0);
 signal nop: std_logic;
 signal nop_vector : in std_logic_vector (31 downto 0);
 
+-- arbiter
+signal ai_writedata: STD_LOGIC_VECTOR (31 DOWNTO 0);
+signal ai_address: INTEGER;
+signal ai_memwrite: STD_LOGIC;
+signal ai_memread: STD_LOGIC;
+signal ai_readdata: STD_LOGIC_VECTOR (31 DOWNTO 0);
+signal ai_waitrequest: STD_LOGIC;
+
+signal ad_writedata: STD_LOGIC_VECTOR (31 DOWNTO 0);
+signal ad_address: INTEGER;
+signal ad_memwrite: STD_LOGIC;
+signal ad_memread: STD_LOGIC;
+signal ad_readdata: STD_LOGIC_VECTOR (31 DOWNTO 0);
+signal ad_waitrequest: STD_LOGIC;
+
+signal m_writedata: STD_LOGIC_VECTOR (31 DOWNTO 0);
+signal m_address: INTEGER;
+signal m_memwrite: STD_LOGIC;
+signal m_memread: STD_LOGIC;
+signal m_readdata: STD_LOGIC_VECTOR (31 DOWNTO 0);
+signal m_waitrequest: STD_LOGIC;
+
 begin
 	fet:fetch
 	port map(
@@ -499,19 +521,19 @@ begin
         clock => clk,
         reset => reset,
 
-        s_addr => i_address;
-        s_read => i_memread;
-        s_readdata => i_readdata;
-        s_write => nop;
-        s_writedata => nop_vector;
-        s_waitrequest => i_waitrequest; 
+        s_addr => i_address,
+        s_read => i_memread,
+        s_readdata => i_readdata,
+        s_write => nop,
+        s_writedata => nop_vector,
+        s_waitrequest => i_waitrequest,
         
-        m_addr : out integer range 0 to ram_size-1;
-        m_read : out std_logic;
-        m_readdata : in std_logic_vector (7 downto 0);
-        m_write : out std_logic;
-        m_writedata : out std_logic_vector (7 downto 0);
-        m_waitrequest : in std_logic
+        m_addr => ai_address,
+        m_read => ai_memread,
+        m_readdata => ai_readdata,
+        m_write => ai_memwrite,
+        m_writedata => ai_writedata,
+        m_waitrequest => ai_waitrequest
     );
 
     data_cache: cache
@@ -519,38 +541,38 @@ begin
         clock => clk,
         reset => reset,
 
-        s_addr => i_address;
-        s_read => i_memread;
-        s_readdata => i_readdata;
-        s_write => nop;
-        s_writedata => nop_vector;
-        s_waitrequest => i_waitrequest; 
+        s_addr => i_address,
+        s_read => i_memread,
+        s_readdata => i_readdata,
+        s_write => nop,
+        s_writedata => nop_vector,
+        s_waitrequest => i_waitrequest,
         
-        m_addr : out integer range 0 to ram_size-1;
-        m_read : out std_logic;
-        m_readdata : in std_logic_vector (7 downto 0);
-        m_write : out std_logic;
-        m_writedata : out std_logic_vector (7 downto 0);
-        m_waitrequest : in std_logic
+        m_addr => ad_address,
+        m_read => ad_memread,
+        m_readdata => ad_readdata,
+        m_write => ad_memwrite,
+        m_writedata => ad_writedata,
+        m_waitrequest => ad_waitrequest
     );
 
     arb: arbiter
     port map(
         clk: in std_logic;
 
-        i_writedata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		i_address: IN INTEGER;
-		i_memwrite: IN STD_LOGIC;
-		i_memread: IN STD_LOGIC;
-		i_readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		i_waitrequest: OUT STD_LOGIC;
+        i_writedata => ai_writedata,
+		i_address => ai_address,
+		i_memwrite => ai_memwrite,
+		i_memread => ai_memread,
+		i_readdata => ai_readdata,
+		i_waitrequest => ai_waitrequest,
 
-        d_writedata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		d_address: IN INTEGER;
-		d_memwrite: IN STD_LOGIC;
-		d_memread: IN STD_LOGIC;
-		d_readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		d_waitrequest: OUT STD_LOGIC;
+        d_writedata => ad_writedata,
+		d_address => ad_address,
+		d_memwrite => ad_memwrite,
+		d_memread => ad_memread,
+		d_readdata => ad_readdata,
+		d_waitrequest => ad_waitrequest,
 
         m_writedata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 		m_address: OUT INTEGER := 0;
@@ -563,12 +585,12 @@ begin
 	main: main_memory
 	port map(
 		clock => clk,
-		writedata => d_writedata,
-		address => d_address,
-		memwrite => d_memwrite,
-		memread => d_memread,
-		readdata => d_readdata,
-		waitrequest => d_waitrequest,
+		writedata => m_writedata,
+		address => m_address,
+		memwrite => m_memwrite,
+		memread => m_memread,
+		readdata => m_readdata,
+		waitrequest => m_waitrequest,
 		write_to_text => write_to_text
 		);
 
