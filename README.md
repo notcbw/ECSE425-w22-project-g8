@@ -32,6 +32,6 @@ In the console of ModelSim:
 ```
 cd <root of the project>   
 source run.tcl  
-``
+```
 
 
