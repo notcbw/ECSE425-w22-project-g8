@@ -11,13 +11,11 @@ entity fetch is
 		branch_taken: in std_logic := '0';
         branch_addr: in std_logic_vector(31 DOWNTO 0);
 		pc: out std_logic_vector(31 DOWNTO 0);
-		s_addr_inst: out integer := 0; -- send address to cache
-		s_read_inst: out std_logic; -- send read signal to cache
+		s_addr_inst: out integer := 0; -- send address to memory
+		s_read_inst: out std_logic; -- send read signal to memory
 		inst: out std_logic_vector(31 downto 0); --  send instruction to ID
-		s_waitrequest_inst: in std_logic :='0'; -- get waitrequest signal from cache
-		s_readdata_inst: in std_logic_vector(31 downto 0) -- get instruction from cache
-        --mem_data_stall: in std_logic; 
-		--ismiss: in std_logic := '0'
+		s_waitrequest_inst: in std_logic :='0'; -- get waitrequest signal from memory
+		s_readdata_inst: in std_logic_vector(31 downto 0) -- get instruction from memory
 		
 	);
     end fetch;
