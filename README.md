@@ -17,7 +17,7 @@ Willems, James
 | 2.3 - Decode             | Bowen    |
 | 2.4 - Execute            | James    |
 | 2.5 - Memory             | Amine    |
-| 2.6 - Write_Back.        | Krishna  |
+| 2.6 - Write_Back         | Krishna  |
 | 2.7 - Pipelined_Processor| Team     |
 | 2.8 - Testbench          | Team     |
 | 3.1 - Unit Tests         | Team     |
