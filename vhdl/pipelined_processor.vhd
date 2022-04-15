@@ -256,6 +256,13 @@ component arbiter is
 		m_waitrequest: IN STD_LOGIC
 	);
 end component;
+
+component adapter is
+	port(
+		addr_vec: out std_logic_vector(31 downto 0);
+        addr_int: in integer
+	);
+	end component;
 		
 -- signals
 -- generic
@@ -362,6 +369,10 @@ signal m_memwrite: STD_LOGIC;
 signal m_memread: STD_LOGIC;
 signal m_readdata: STD_LOGIC_VECTOR (31 DOWNTO 0);
 signal m_waitrequest: STD_LOGIC;
+
+-- adapter signal for caches 
+signal i_address_a: STD_LOGIC_VECTOR (31 DOWNTO 0);
+signal d_address_a: STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 begin
 	fet:fetch
@@ -521,7 +532,7 @@ begin
         clock => clk,
         reset => reset,
 
-        s_addr => i_address,
+        s_addr => i_address_a,
         s_read => i_memread,
         s_readdata => i_readdata,
         s_write => nop,
@@ -536,12 +547,18 @@ begin
         m_waitrequest => ai_waitrequest
     );
 
+	inst_adapter: adapter
+	port map(
+		addr_vec => i_address_a,
+		addr_int => i_address
+	);
+
     data_cache: cache
     port map(
         clock => clk,
         reset => reset,
 
-        s_addr => i_address,
+        s_addr => d_address_a,
         s_read => i_memread,
         s_readdata => i_readdata,
         s_write => nop,
@@ -556,9 +573,15 @@ begin
         m_waitrequest => ad_waitrequest
     );
 
+	data_adapter: adapter
+	port map(
+		addr_vec => d_address_a,
+		addr_int => d_address
+	);
+
     arb: arbiter
     port map(
-        clk: in std_logic;
+        clk => clk, 
 
         i_writedata => ai_writedata,
 		i_address => ai_address,
@@ -574,12 +597,12 @@ begin
 		d_readdata => ad_readdata,
 		d_waitrequest => ad_waitrequest,
 
-        m_writedata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		m_address: OUT INTEGER := 0;
-		m_memwrite: OUT STD_LOGIC;
-		m_memread: OUT STD_LOGIC;
-		m_readdata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		m_waitrequest: IN STD_LOGIC
+        m_writedata => m_writedata,
+		m_address => m_address,
+		m_memwrite => m_memwrite,
+		m_memread => m_memread,
+		m_readdata => m_readdata,
+		m_waitrequest => m_waitrequest
     );
 
 	main: main_memory
