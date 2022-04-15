@@ -26,6 +26,8 @@ architecture behaviour of decode_tb is
 				write_reg_m: in std_logic_vector(4 downto 0);
 				reg_write_w: in std_logic;
 				write_reg_w: in std_logic_vector(4 downto 0);
+				pc_in: in std_logic_vector(31 downto 0);	
+				pc_out: out std_logic_vector(31 downto 0);
 				op: out std_logic_vector(5 downto 0);		-- opcode to control unit
 				funct: out std_logic_vector(5 downto 0);	-- funct to control unit
 				a1_out: out std_logic_vector(4 downto 0);	-- a1 to register file
@@ -97,6 +99,8 @@ architecture behaviour of decode_tb is
 	signal reg_write_w: std_logic := '0';
 	signal write_reg_w: std_logic_vector(4 downto 0);
 	signal op: std_logic_vector(5 downto 0);
+	signal pc_in: std_logic_vector(31 downto 0);	
+	signal pc_out: std_logic_vector(31 downto 0);
 	signal funct: std_logic_vector(5 downto 0);
 	signal a1: std_logic_vector(4 downto 0);
 	signal a2: std_logic_vector(4 downto 0);
@@ -140,7 +144,8 @@ begin
 		write_reg_m => write_reg_m,
 		reg_write_w => reg_write_w,
 		write_reg_w => write_reg_w,
-		
+		pc_in => pc_in,
+		pc_out => pc_out,
 		op => op,
 		funct => funct,
 		a1_out => a1,
