@@ -24,9 +24,9 @@ port(	clk: in std_logic;
 		
 		-- avalon interface to memory or cache
 		m_addr : out integer := 0;
-		m_read : out std_logic;
+		m_read : out std_logic := '0';
 		m_readdata : in std_logic_vector (31 downto 0);
-		m_write : out std_logic;
+		m_write : out std_logic := '0';
 		m_writedata : out std_logic_vector (31 downto 0);
 		m_waitrequest : in std_logic
 		);
@@ -37,7 +37,7 @@ architecture rtl of memory is
 	signal write_data_buf: std_logic_vector(31 downto 0);
 	-- state
 	type state_type is (default_state, wait_for_read, wait_for_write);
-	signal cur_state: state_type;
+	signal cur_state: state_type := default_state;
 begin
 	stall <= '0' when cur_state=default_state else '1';
 	process(clk, m_waitrequest)

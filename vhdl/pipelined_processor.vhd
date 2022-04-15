@@ -223,9 +223,9 @@ component cache is
         
         m_addr : out integer range 0 to ram_size-1;
         m_read : out std_logic;
-        m_readdata : in std_logic_vector (7 downto 0);
+        m_readdata : in std_logic_vector (31 downto 0);
         m_write : out std_logic;
-        m_writedata : out std_logic_vector (7 downto 0);
+        m_writedata : out std_logic_vector (31 downto 0);
         m_waitrequest : in std_logic
     );
 end component;
@@ -249,7 +249,7 @@ component arbiter is
 		d_waitrequest: OUT STD_LOGIC;
 
         m_writedata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		m_address: OUT INTEGER := 0;
+		m_address: OUT INTEGER range 0 to ram_size-1;
 		m_memwrite: OUT STD_LOGIC;
 		m_memread: OUT STD_LOGIC;
 		m_readdata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -260,7 +260,7 @@ end component;
 component adapter is
 	port(
 		addr_vec: out std_logic_vector(31 downto 0);
-        addr_int: in integer
+        addr_int: in integer := 0
 	);
 	end component;
 		
@@ -559,11 +559,11 @@ begin
         reset => reset,
 
         s_addr => d_address_a,
-        s_read => i_memread,
-        s_readdata => i_readdata,
-        s_write => nop,
-        s_writedata => nop_vector,
-        s_waitrequest => i_waitrequest,
+        s_read => d_memread,
+        s_readdata => d_readdata,
+        s_write => d_memwrite,
+        s_writedata => d_writedata,
+        s_waitrequest => d_waitrequest,
         
         m_addr => ad_address,
         m_read => ad_memread,

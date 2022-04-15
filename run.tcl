@@ -52,8 +52,11 @@ proc AddWaves {} {
 }
 
 vlib work
-vcom -2008 vhdl/inst_memory.vhd
+#vcom -2008 vhdl/inst_memory.vhd
+vcom -2008 vhdl/adapter.vhd
+vcom -2008 vhdl/cache.vhd
 vcom -2008 vhdl/fetch.vhd
+vcom -2008 vhdl/arbiter.vhd
 vcom -2008 vhdl/mips_package.vhd
 vcom -2008 vhdl/register_file.vhd
 vcom -2008 vhdl/ctrl_unit.vhd
@@ -61,15 +64,17 @@ vcom -2008 vhdl/decode.vhd
 vcom -2008 vhdl/fwd_decode.vhd
 vcom -2008 vhdl/ALU.vhd
 vcom -2008 vhdl/execute.vhd
-vcom -2008 vhdl/data_memory.vhd
+#vcom -2008 vhdl/data_memory.vhd
+vcom -2008 vhdl/main_memory.vhd
 vcom -2008 vhdl/memory.vhd
 vcom -2008 vhdl/write_back.vhd
 vcom -2008 vhdl/pipelined_processor.vhd
 
 vsim processor
 
+force -deposit reset 1 0 ns, 0 1 ns
 force -deposit clk 0 0 ns, 1 0.5 ns -repeat 1 ns
 
 AddWaves
 
-run 10000ns
+#run 10000ns
