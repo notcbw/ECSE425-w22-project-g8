@@ -34,7 +34,8 @@ begin
 				full := std_logic_vector(signed(var1) * signed(var2)); -- use of := for immediate assignemnt
 				
 			when divide =>
-				full := (std_logic_vector(signed(var1) / signed(var2)) & std_logic_vector(signed(var1) mod signed(var2)));
+				--full := (std_logic_vector(signed(var1) / signed(var2)) & std_logic_vector(signed(var1) mod signed(var2)));
+				full := (std_logic_vector(signed(var1) mod signed(var2)) & std_logic_vector(signed(var1) / signed(var2)));
 
 			when slt =>
 				if(signed(var1) < signed(var2)) then
