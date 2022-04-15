@@ -34,8 +34,7 @@ begin
 				full := std_logic_vector(signed(var1) * signed(var2)); -- use of := for immediate assignemnt
 				
 			when divide =>
-				lo <= std_logic_vector(signed(var1) / signed(var2));
-				hi <= std_logic_vector(signed(var1) mod signed(var2));
+				full := (std_logic_vector(signed(var1) / signed(var2)) & std_logic_vector(signed(var1) mod signed(var2)));
 
 			when slt =>
 				if(signed(var1) < signed(var2)) then
@@ -72,7 +71,7 @@ begin
 				alu_result <= std_logic_vector(shift_right(signed(var1), to_integer(unsigned(var2))));
 
 			when lui =>
-				alu_result <= std_logic_vector(SHIFT_LEFT(signed(var1),16));
+				alu_result <= std_logic_vector(SHIFT_LEFT(signed(var2),16));
 
 			when nop =>
 				alu_result <= zero;
