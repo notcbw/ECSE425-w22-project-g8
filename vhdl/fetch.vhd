@@ -44,7 +44,7 @@ entity fetch is
                 
                 if state='0' then
 					if (stall = '1') then
-						inst <= x"00000020"; -- stall by sending 0+0=0
+						-- inst <= x"00000020"; -- stall by sending 0+0=0
 					elsif (stall = '0') and (s_waitrequest_inst = '1') then
 						s_addr_inst <= to_integer(unsigned(pc_internal));
 						s_read_inst <= '1';

@@ -82,10 +82,14 @@ begin
 			-- pc related operations
 			if branch='1' then
 				-- branch, new_pc = pc+imm<2
+				pc_write <= '1';
 				PC_out <= std_logic_vector(to_unsigned(to_integer(unsigned(PC)) + to_integer(shift_left(signed(immEx), 2)), 32));
 			elsif jump='1' then
 				-- jump, new_pc = imm<2
+				pc_write <= '1';
 				PC_out <= std_logic_vector(shift_left(unsigned(immEx), 2));
+			else
+			pc_write <= '0';
 			end if;
 			
 			-- link operation
