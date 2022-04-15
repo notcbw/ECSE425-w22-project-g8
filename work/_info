@@ -15,7 +15,7 @@ Z2 DPx4 work 11 mips_common 0 22 Y<RmFH`b;KYPbMOI8HFF90
 Z3 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
 Z4 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 Z5 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
-!i122 666
+!i122 683
 R0
 Z6 8vhdl/ALU.vhd
 Z7 Fvhdl/ALU.vhd
@@ -25,9 +25,9 @@ VVK1ki^ET:8PT[CA?A8R_d0
 !s100 3?^DUTg^TJ1X5[DG^Q39<2
 Z8 OV;C;2020.1;71
 33
-Z9 !s110 1650002313
+Z9 !s110 1650003944
 !i10b 1
-Z10 !s108 1650002313.000000
+Z10 !s108 1650003944.000000
 Z11 !s90 -reportprogress|300|-2008|vhdl/ALU.vhd|
 Z12 !s107 vhdl/ALU.vhd|
 !i113 1
@@ -39,7 +39,7 @@ R3
 R4
 R5
 DEx4 work 3 alu 0 22 VK1ki^ET:8PT[CA?A8R_d0
-!i122 666
+!i122 683
 l20
 L17 68
 VZgC:JATLJiL9Ye8gbTCG;0
@@ -60,7 +60,7 @@ R2
 R3
 R4
 R5
-!i122 663
+!i122 680
 R0
 Z15 8vhdl/ctrl_unit.vhd
 Z16 Fvhdl/ctrl_unit.vhd
@@ -84,7 +84,7 @@ R3
 R4
 R5
 DEx4 work 9 ctrl_unit 0 22 L]24V^Sd;iD;GM5kQ>0IM1
-!i122 663
+!i122 680
 l29
 L26 90
 Vg?`T_A9P@b5=^`aShAFL01
@@ -100,12 +100,12 @@ R18
 R13
 R14
 Edata_memory
-Z19 w1650002231
+Z19 w1650003700
 Z20 DPx4 ieee 16 std_logic_textio 0 22 ^l:n6VFdg74Q?CKDhjD]D3
 R3
 R4
 R5
-!i122 668
+!i122 685
 R0
 Z21 8vhdl/data_memory.vhd
 Z22 Fvhdl/data_memory.vhd
@@ -115,9 +115,9 @@ VCoS?AImXHOFW9R^HK25lZ3
 !s100 6j7;C@n2D10oP_6VFh_8h0
 R8
 33
-Z23 !s110 1650002314
+Z23 !s110 1650003945
 !i10b 1
-Z24 !s108 1650002314.000000
+Z24 !s108 1650003945.000000
 Z25 !s90 -reportprogress|300|-2008|vhdl/data_memory.vhd|
 Z26 !s107 vhdl/data_memory.vhd|
 !i113 1
@@ -129,11 +129,11 @@ R3
 R4
 R5
 DEx4 work 11 data_memory 0 22 CoS?AImXHOFW9R^HK25lZ3
-!i122 668
+!i122 685
 l34
 L28 66
-VER3VCVzZWnV:?NLOLIUd>2
-!s100 3V>7<<dYT76;OA38iAWP]0
+V4dkOKJnP_Ji@AY@9J3i[A3
+!s100 BPEY_di51H6fDWUTnjbDm2
 R8
 33
 R23
@@ -149,7 +149,7 @@ Z27 w1650001468
 R3
 R4
 R5
-!i122 664
+!i122 681
 R0
 Z28 8vhdl/decode.vhd
 Z29 Fvhdl/decode.vhd
@@ -172,7 +172,7 @@ R3
 R4
 R5
 DEx4 work 6 decode 0 22 3_k8bg:h[;4Aga0R[[2zQ3
-!i122 664
+!i122 681
 l39
 L36 87
 V<NlYSdGgmfcM1=H7amAz>1
@@ -193,7 +193,7 @@ R2
 R3
 R4
 R5
-!i122 667
+!i122 684
 R0
 Z33 8vhdl/execute.vhd
 Z34 Fvhdl/execute.vhd
@@ -203,7 +203,7 @@ VgmAjgh^lTXUa@FnjHO_g]1
 !s100 ^@;?548dPBgD0UB3S:IMk1
 R8
 33
-R9
+R23
 !i10b 1
 R10
 Z35 !s90 -reportprogress|300|-2008|vhdl/execute.vhd|
@@ -217,14 +217,14 @@ R3
 R4
 R5
 DEx4 work 7 execute 0 22 gmAjgh^lTXUa@FnjHO_g]1
-!i122 667
+!i122 684
 l56
 L38 69
 VQ2F]2=8N]V3hW95D`]gm80
 !s100 `>n0KV5H;I;gn3oJGz][z3
 R8
 33
-R9
+R23
 !i10b 1
 R10
 R35
@@ -237,7 +237,7 @@ Z37 w1650002047
 R3
 R4
 R5
-!i122 660
+!i122 677
 R0
 Z38 8vhdl/fetch.vhd
 Z39 Fvhdl/fetch.vhd
@@ -260,7 +260,7 @@ R3
 R4
 R5
 DEx4 work 5 fetch 0 22 im^NnoinPg[jdS_FA=d4>3
-!i122 660
+!i122 677
 l30
 L25 44
 VCUQDPHW@^[H31]]O7=JaR2
@@ -280,7 +280,7 @@ Z42 w1649983179
 R3
 R4
 R5
-!i122 665
+!i122 682
 R0
 Z43 8vhdl/fwd_decode.vhd
 Z44 Fvhdl/fwd_decode.vhd
@@ -303,7 +303,7 @@ R3
 R4
 R5
 DEx4 work 10 fwd_decode 0 22 ^<efE[hmKe2B?kLa]COI?1
-!i122 665
+!i122 682
 l19
 L18 16
 VNTL4Dz3D5IF@6^l3[nS>k3
@@ -324,7 +324,7 @@ R20
 R3
 R4
 R5
-!i122 659
+!i122 676
 R0
 Z48 8vhdl/inst_memory.vhd
 Z49 Fvhdl/inst_memory.vhd
@@ -348,7 +348,7 @@ R3
 R4
 R5
 DEx4 work 11 inst_memory 0 22 Ab<nfh?]M[S=e;K:K^:Jd3
-!i122 659
+!i122 676
 l31
 L25 62
 V@36mk[A=UdH75Qmk[I5VQ2
@@ -368,7 +368,7 @@ Z52 w1649990974
 R3
 R4
 R5
-!i122 669
+!i122 686
 R0
 Z53 8vhdl/memory.vhd
 Z54 Fvhdl/memory.vhd
@@ -391,7 +391,7 @@ R3
 R4
 R5
 DEx4 work 6 memory 0 22 FFzME1b^92R2]L;7ZQ=ZY3
-!i122 669
+!i122 686
 l41
 L35 65
 VjA[AI:ZE9ejjKI?nfC7[50
@@ -409,7 +409,7 @@ R14
 Pmips_common
 R4
 R5
-!i122 661
+!i122 678
 R42
 R0
 8vhdl/mips_package.vhd
@@ -435,7 +435,7 @@ R20
 R3
 R4
 R5
-!i122 671
+!i122 688
 R0
 Z58 8vhdl/pipelined_processor.vhd
 Z59 Fvhdl/pipelined_processor.vhd
@@ -460,7 +460,7 @@ R3
 R4
 R5
 Z62 DEx4 work 9 processor 0 22 l5DkNY;MOhTPRenN_W4kE1
-!i122 671
+!i122 688
 l305
 Z63 L22 460
 Z64 V@AfT^`>W3_D_gUkma3gP>1
@@ -476,25 +476,47 @@ R61
 R13
 R14
 Eregister_file
-R42
+Z66 w1650003933
+R20
 R3
 R4
 R5
-!i122 662
+!i122 679
 R0
-Z66 8vhdl/register_file.vhd
-Z67 Fvhdl/register_file.vhd
+Z67 8vhdl/register_file.vhd
+Z68 Fvhdl/register_file.vhd
 l0
-L6 1
-VoaNT:Pb?6jJ=69aP2gU9E3
-!s100 IUlzdb05;79[<X@BZldf32
+L8 1
+V3NUJL]]V;XgZnTCXYDDQO3
+!s100 jG?=951nY4@>SI@d4DFOW2
 R8
 33
 R9
 !i10b 1
 R10
-Z68 !s90 -reportprogress|300|-2008|vhdl/register_file.vhd|
-Z69 !s107 vhdl/register_file.vhd|
+Z69 !s90 -reportprogress|300|-2008|vhdl/register_file.vhd|
+Z70 !s107 vhdl/register_file.vhd|
+!i113 1
+R13
+R14
+Abehaviour
+R20
+R3
+R4
+R5
+DEx4 work 13 register_file 0 22 3NUJL]]V;XgZnTCXYDDQO3
+!i122 679
+l28
+L23 37
+VJCHOB27Fm3;ke5S==QCZ@1
+!s100 Ub?n8PIA2QG;?Q8C9zXoO0
+R8
+33
+R9
+!i10b 1
+R10
+R69
+R70
 !i113 1
 R13
 R14
@@ -510,23 +532,24 @@ VVB[RX?UEZflJfZCdXSbT31
 !s100 H]OK<W^?=YaH[e?m4N<ao3
 R8
 33
-R9
+!s110 1650002313
 !i10b 1
-R10
-R68
+!s108 1650002313.000000
 R69
+R70
 !i113 1
 R13
 R14
+R42
 Ewrite_back
 R1
 R3
 R4
 R5
-!i122 670
+!i122 687
 R0
-Z70 8vhdl/write_back.vhd
-Z71 Fvhdl/write_back.vhd
+Z71 8vhdl/write_back.vhd
+Z72 Fvhdl/write_back.vhd
 l0
 L6 1
 Vc1ANRO5Aj>bQ8cW^HVRF32
@@ -536,8 +559,8 @@ R8
 R23
 !i10b 1
 R24
-Z72 !s90 -reportprogress|300|-2008|vhdl/write_back.vhd|
-Z73 !s107 vhdl/write_back.vhd|
+Z73 !s90 -reportprogress|300|-2008|vhdl/write_back.vhd|
+Z74 !s107 vhdl/write_back.vhd|
 !i113 1
 R13
 R14
@@ -546,7 +569,7 @@ R3
 R4
 R5
 DEx4 work 10 write_back 0 22 c1ANRO5Aj>bQ8cW^HVRF32
-!i122 670
+!i122 687
 l21
 L19 17
 VWK_Ed4dX94bKM7]VcF9KS3
@@ -556,8 +579,8 @@ R8
 R23
 !i10b 1
 R24
-R72
 R73
+R74
 !i113 1
 R13
 R14

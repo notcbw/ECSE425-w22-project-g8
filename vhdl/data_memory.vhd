@@ -46,7 +46,7 @@ BEGIN
 		
 		-- writes content to log after threshold has passed
 		if now = log_time then
-			file_open(data_memoryFile, "data.txt", write_mode);
+			file_open(data_memoryFile, "memory.txt", write_mode);
 			while (rowLine < ram_size) loop 
 				write(outLine, ram_block(rowLine));		-- choose line to write
 				writeline(data_memoryFile, outLine);	-- write word to line
