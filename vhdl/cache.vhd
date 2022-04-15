@@ -18,361 +18,220 @@ port(
 	s_writedata : in std_logic_vector (31 downto 0);
 	s_waitrequest : out std_logic; 
     
-	m_addr : out integer range 0 to ram_size-1;
-	m_read : out std_logic;
-	m_readdata : in std_logic_vector (7 downto 0);
-	m_write : out std_logic;
-	m_writedata : out std_logic_vector (7 downto 0);
+	m_addr : out integer := 0;
+	m_read : out std_logic := '0';
+	m_readdata : in std_logic_vector (31 downto 0);
+	m_write : out std_logic := '0';
+	m_writedata : out std_logic_vector (31 downto 0);
 	m_waitrequest : in std_logic
 );
 end cache;
 
 architecture arch of cache is
-	TYPE CAC IS ARRAY(31 downto 0) OF STD_LOGIC_VECTOR(135 DOWNTO 0);
-	SIGNAL direct_map_cache: CAC;
--- declare signals here
---VND means Valid and not dirty, VD means Valid but dirty
-type State is (IDLE, VND, VD);
+
+	-- States
+	type state_type is (hit_check, write_back, read_mem, read_return, cache_write);
+	signal current_state: state_type;
+	
+	-- dblock: data block of 4 of 32-bit words
+	type dblock is array(3 downto 0) of std_logic_vector(31 downto 0);
+
+	-- cell: each cell of the cache. Consisting a valid bit, a 6-bit tag and a 128-bit data block
+	type line is record
+		valid	: std_logic;
+		dirty	: std_logic;
+		tag		: std_logic_vector(5 downto 0);	-- 6-bit tag
+		data	: dblock;	-- 128-bit block
+	end record;
+	
+	-- cache_array: the caches with 32 lines, matryoshka style
+	type cache_array is array(31 downto 0) of line;
+	signal cache_body: cache_array;
+
+	-- buffers
+	signal buf_s_addr: std_logic_vector(31 downto 0);
+	signal buf_s_data: std_logic_vector(31 downto 0);
+	signal addr_buf: std_logic_vector(31 downto 0);
+	
+	-- flags
+	signal flag_write: std_logic := '0';
+	signal mem_read_ready: std_logic := '1';
+	signal loop_counter: integer range 0 to 3;
 
 begin
 
--- make circuits here
-process (clock, reset)
---variables declarations
-variable idx	: integer range 0 to 31;	--block index
-variable tag	: std_logic_vector (5 downto 0);
-variable data	: std_logic_vector (127 downto 0);
-variable dirty  : std_logic := '0';
-variable valid	: std_logic;
-variable addr	: integer range 0 to ram_size-1 := TO_INTEGER(unsigned(s_addr));
-variable word   : integer range 0 to 3;	--word offset
-variable byte_n : integer range 0 to 31 := 0; --byte offset
-variable byte_n2: integer range 0 to 31 := 0; --byte offset
-variable mr		: std_logic := '0';
-variable mw		: std_logic := '0';
-variable wreq   : std_logic := '1';
-variable S		: State;
---begin process
+	addr_buf(3 downto 2) <= std_logic_vector(to_unsigned(loop_counter, 2));
+	addr_buf(1 downto 0) <= "00";
+
+-- state machine of cache
+cache_logic: process (clock, reset, m_waitrequest)
 begin
-	if falling_edge (reset) then
-    	S := IDLE;
-        for i in 0 to 31 loop
-        	direct_map_cache(i) (135) <= '0'; --clear all valid bit
-        end loop;
-        s_waitrequest <= '1';
-    elsif rising_edge (clock) then
-      idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-    if direct_map_cache(idx) (135) = '0' then
-    	S := IDLE;
-    elsif direct_map_cache(idx) (134) = '0' then
-    	S := VND;
-    else 
-    	S := VD;
-    end if;
-    if wreq = '0' then
-    	wreq := '1';
-        s_waitrequest <= '1';
-    else case S is 
-        	--if the state is IDLE
-        	When IDLE =>
-            	--input: both s_read and s_write set
-            	if s_read = '1' and s_write = '1' then
-                	S := S;--State keeps at IDLE
-                --input: s_read set
-                elsif s_read = '1' then
-                	--bring block from memory to cache
-                	m_read <= '1';
-                    s_waitrequest <= '1';
-                    addr := TO_INTEGER(unsigned(s_addr (31 downto 4)))*16;
-                    tag := s_addr (14 downto 9);
-                    idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-                    m_addr <= addr + byte_n;
-                    if m_waitrequest = '0' then
-                    	data (7+8*byte_n downto 8*byte_n) := m_readdata;
-                    	if byte_n /= 15 then
-                        	byte_n := byte_n +1;
-                            m_read <= '0';
-						else
-                        	byte_n := 0;
-                    		m_read <= '0';
-                    		valid := '1';
-             		       	dirty := '0';
-                    		word  := TO_INTEGER(unsigned(s_addr(3 downto 2)));
-                    		direct_map_cache(idx) (135) <= valid;
-                  		  	direct_map_cache(idx) (134) <= dirty;
-                    		direct_map_cache(idx) (133 downto 128) <= tag; --match tag
-                    		direct_map_cache(idx) (127 downto 0) <= data;
-                    		--core reads data outof cache
-                    		s_waitrequest <= '0';
-                            wreq  := '0';
-                    		s_readdata <= data(31+32*word downto 32*word);
-                    		S := VND; --update state to VND   
-                        end if;
-                    end if;
-                --input: s_write set
-                elsif s_write = '1' then
-                	--bring block from memory to cache
-                	m_read <= '1';
-                    s_waitrequest <= '1';
-                    addr := TO_INTEGER(unsigned(s_addr (31 downto 4)))*16;
-                    tag := s_addr (14 downto 9);
-                    idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-                    m_addr <= addr + byte_n;
-                    if m_waitrequest = '0' then
-                    	data (7+8*byte_n downto 8*byte_n) := m_readdata;
-                    	if byte_n /= 15 then
-                        	byte_n := byte_n +1;
-                            m_read <= '0';
-						else
-                        	byte_n := 0;
-                    		m_read <= '0';
-                    		valid := '1';
-             		       	dirty := '1';
-                    		word  := TO_INTEGER(unsigned(s_addr(3 downto 2)));
-                    		direct_map_cache(idx) (135) <= valid;
-                  		  	direct_map_cache(idx) (134) <= dirty;
-                    		direct_map_cache(idx) (133 downto 128) <= tag; --match tag
-                    		direct_map_cache(idx) (127 downto 0) <= data;
-                    		--core writes to cache
-                    		direct_map_cache(idx) (31+32*word downto 32*word) <= s_writedata;
-                    		s_waitrequest <= '0';
-                            wreq  := '0';
-                    		S := VD; --update state to VD
-                        end if;
-                    end if;
-  			    else --for other cases, just contine;
-                	S := S;
-                end if;
-            -- if state is VND
-            when VND =>
-            	--temperarily store new block idx and tag
-            	idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-            	tag := direct_map_cache(idx) (133 downto 128);
-                --input: s_read set and tag matched
-                if s_read = '1' and tag = s_addr (14 downto 9) then
-                	--core reads data outof cache
-					s_waitrequest <= '0';
-                    wreq  := '0';
-                    word  := TO_INTEGER(unsigned(s_addr(3 downto 2)));
-                	s_readdata <= direct_map_cache(idx) (31+32*word downto 32*word);
-                --input: s_write set and tag matched
-                elsif s_write = '1' and tag = s_addr (14 downto 9) then
-                	--core writes data to cache
-                	s_waitrequest <= '0';
-                    wreq  := '0';
-                    word := TO_INTEGER(unsigned(s_addr (3 downto 2)));
-                    direct_map_cache(idx) (31+32*word downto 32*word) <= s_writedata;
-                    dirty := '1';
-                    direct_map_cache(idx) (134) <= dirty;
-                    S := VD; --update state to VD
-                --input: s_read set but tag mismatched   
-           		elsif s_read = '1' and tag /= s_addr (14 downto 9) then
-                	--bring block from memory to cache
-                	m_read <= '1';
-                    s_waitrequest <= '1';
-                    addr := TO_INTEGER(unsigned(s_addr (31 downto 4)))*16;
-                    tag := s_addr (14 downto 9);
-                    idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-                    m_addr <= addr + byte_n;
-                    if m_waitrequest = '0' then
-                    	data (7+8*byte_n downto 8*byte_n) := m_readdata;
-                    	if byte_n /= 15 then
-                        	byte_n := byte_n +1;
-                            m_read <= '0';
-						else
-                        	byte_n := 0;
-                    		m_read <= '0';
-                    		valid := '1';
-             		       	dirty := '0';
-                    		word  := TO_INTEGER(unsigned(s_addr(3 downto 2)));
-                    		direct_map_cache(idx) (135) <= valid;
-                  		  	direct_map_cache(idx) (134) <= dirty;
-                    		direct_map_cache(idx) (133 downto 128) <= tag; --match tag
-                    		direct_map_cache(idx) (127 downto 0) <= data;
-                    		--core reads data outof cache
-                    		s_waitrequest <= '0';
-                            wreq  := '0';
-                    		s_readdata <= data(31+32*word downto 32*word);
-                        end if;
-                    end if;
-                --input: s_write set but tag mismatched
-                elsif s_write = '1' and tag /= s_addr (14 downto 9) then
-                	--bring block from memory to cache
-                	m_read <= '1';
-                    s_waitrequest <= '1';
-                    addr := TO_INTEGER(unsigned(s_addr (31 downto 4)))*16;
-                    tag := s_addr (14 downto 9);
-                    idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-                    m_addr <= addr + byte_n;
-                    if m_waitrequest = '0' then
-                    	data (7+8*byte_n downto 8*byte_n) := m_readdata;
-                    	if byte_n /= 15 then
-                        	byte_n := byte_n +1;
-                            m_read <= '0';
-						else
-                        	byte_n := 0;
-                    		m_read <= '0';
-                    		valid := '1';
-             		       	dirty := '1';
-                    		word  := TO_INTEGER(unsigned(s_addr(3 downto 2)));
-                    		direct_map_cache(idx) (135) <= valid;
-                  		  	direct_map_cache(idx) (134) <= dirty;
-                    		direct_map_cache(idx) (133 downto 128) <= tag; --match tag
-                    		direct_map_cache(idx) (127 downto 0) <= data;
-                    		--core writes to cache
-                    		direct_map_cache(idx) (31+32*word downto 32*word) <= s_writedata;
-                    		s_waitrequest <= '0';
-                            wreq  := '0';
-                    		S := VD; --update state to VD
-                        end if;
-                    end if;
-                --input: both s_read and s_write not set
-                elsif s_read = '0' and s_write = '0' then
-                	--rise s_waitrequest
-                	s_waitrequest <= '1';
-                else --for other cases, just continue
-                	S := S;
-                end if;
-            --if state is VD
-            when VD =>
-            	--temperarily store new block idx and tag
-            	idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-            	tag := direct_map_cache(idx) (133 downto 128);
-                word:= TO_INTEGER(unsigned(s_addr(3 downto 2)));
-                --input: s_read set and tag matched
-                if s_read = '1' and tag = s_addr (14 downto 9) then
-                	--core reads data outof cache
-					s_waitrequest <= '0';
-                    wreq  := '0';
-                	s_readdata <= direct_map_cache(idx) (31+32*word downto 32*word);
-                --input: s_write set and tag matched
-                elsif s_write = '1' and tag = s_addr (14 downto 9) then
-                	--core writes data to cache
-                	s_waitrequest <= '0';
-                    wreq  := '0';
-                    direct_map_cache(idx) (31+32*word downto 32*word) <= s_writedata;
-                --input: s_read set and tag mismatched
-           		elsif s_read = '1' and tag /= s_addr (14 downto 9) then
-                	--write data back to memory
-                    s_waitrequest <= '1';
-                    idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-					tag := direct_map_cache(idx) (133 downto 128);
-                    addr := TO_INTEGER(unsigned(std_logic_vector'(tag & std_logic_vector(TO_UNSIGNED(idx, 5)))))*16;
-                	if mr /= '1' then 
-                    	mw := '1';
-                    	m_write <= mw;
-                    	m_addr <= addr + byte_n2;
-                    	m_writedata <= direct_map_cache(idx) (7+8*byte_n2 downto 8*byte_n2);
-                    end if;
-                    if m_waitrequest = '0' and byte_n2 /= 15 then
-                    	byte_n2 := byte_n2 +1;
-                        mw := '0';
-                        m_write <= mw;
-					elsif m_waitrequest = '0' and byte_n2 = 15 then
-                      	--bring block form memory to cache
-                        mr := '1';
-                    	m_read <= mr;
-                    	s_waitrequest <= '1';
-                    	addr := TO_INTEGER(unsigned(s_addr (31 downto 4)))*16;
-                    	tag := s_addr (14 downto 9);
-                    	idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-                      	m_addr <= addr + byte_n;
-                        if m_waitrequest = '0' and mw /= '1' then
-                    		data (7+8*byte_n downto 8*byte_n) := m_readdata;
-                    		if byte_n /= 15 then
-                        		byte_n := byte_n +1;
-                                mr := '0';
-                                m_read <= mr;
-							else
-                        		byte_n := 0;
-                                byte_n2:= 0;
-                              	mr := '0';
-                                m_read <= mr;
-                    			valid := '1';
-             		       		dirty := '0';
-                    			word  := TO_INTEGER(unsigned(s_addr(3 downto 2)));
-                    			direct_map_cache(idx) (135) <= valid;
-                  		  		direct_map_cache(idx) (134) <= dirty;
-                    			direct_map_cache(idx) (133 downto 128) <= tag; --match tag
-                    			direct_map_cache(idx) (127 downto 0) <= data;
-                    			--core reads data outof cache
-                    			s_waitrequest <= '0';
-                                wreq  := '0';
-                    			s_readdata <= data(31+32*word downto 32*word);
-                    			S := VND; --update state to VND   
-                        	end if;
-                        else
-                        	mw := '0';
-                        	m_write <= mw;
-                    	end if;
-                    end if;
-				--input: s_write set and tag mismatched
-                elsif s_write = '1' and tag /= s_addr (14 downto 9) then
-                	--write data back to memory
-                	s_waitrequest <= '1';
-                    idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-					tag := direct_map_cache(idx) (133 downto 128);
-                    addr := TO_INTEGER(unsigned(std_logic_vector'(tag & std_logic_vector(TO_UNSIGNED(idx, 5)))))*16;
-                	if mr /= '1' then 
-                    	mw := '1';
-                    	m_write <= mw;
-                    	m_addr <= addr + byte_n2;
-                    	m_writedata <= direct_map_cache(idx) (7+8*byte_n2 downto 8*byte_n2);
-                    end if;
-                    if m_waitrequest = '0' and byte_n2 /= 15 then
-                    	byte_n2 := byte_n2 +1;
-                        mw := '0';
-                        m_write <= mw;
-					elsif m_waitrequest = '0' and byte_n2 = 15 then
-                    	--bring block form memory to cache
-                    	mr := '1';
-                    	m_read <= mr;
-                    	s_waitrequest <= '1';
-                    	addr := TO_INTEGER(unsigned(s_addr (31 downto 4)))*16;
-                    	tag := s_addr (14 downto 9);
-                    	idx := TO_INTEGER(unsigned(s_addr (8 downto 4)));
-                    	m_addr <= addr + byte_n;
-                    	if m_waitrequest = '0' and mw /= '1' then
-                    		data (7+8*byte_n downto 8*byte_n) := m_readdata;
-                    		if byte_n /= 15 then
-                              byte_n := byte_n +1;
-                              mr := '0';
-                              m_read <= mr;
-							else
-                        		byte_n := 0;
-                                byte_n2:= 0;
-                    			mr := '0';
-                                m_read <= mr;
-                    			valid := '1';
-             		       		dirty := '1';
-                    			word  := TO_INTEGER(unsigned(s_addr(3 downto 2)));
-                    			direct_map_cache(idx) (135) <= valid;
-                              	direct_map_cache(idx) (134) <= dirty;
-                    			direct_map_cache(idx) (133 downto 128) <= tag; --match tag
-                    			direct_map_cache(idx) (127 downto 0) <= data;
-                    			--core writes to cache
-                    			direct_map_cache(idx) (31+32*word downto 32*word) <= s_writedata;
-                    			s_waitrequest <= '0';
-                                wreq  := '0';
-                        	end if;
-                        else
-                        	mw := '0';
-                        	m_write <= mw;
-                    	end if; 
-                    end if;
-                --input: both s_read and s_write not set
-                elsif s_read = '0' and s_write = '0' then
-                	--rise s_waitrequest
-                	s_waitrequest <= '1';
-                --for other cases, just continue
-                else
-                	S := S;
-                end if;   
-          end case;
-    end if;
-    --for other cases, just continue
-    else 
-    	S := S;
-    end if; 
+	if reset'event and reset = '0' then
+		-- reset wait request on the falling edge of reset
+		s_waitrequest <= '1';
+	elsif reset'event and reset = '1' then
+		-- assert wait request
+		s_waitrequest <= '0';
+		-- reset state
+		current_state <= hit_check;
+		flag_write <= '0';
+		mem_read_ready <= '1';
+
+	elsif m_waitrequest'event and m_waitrequest = '1' then
+		-- To unset write signal in write_back state
+		if flag_write = '1' then
+			m_write <= '0';
+
+		-- Retrieve data and count down the counter for read_mem state
+		elsif mem_read_ready = '0' then
+			m_read <= '0';
+			cache_body(to_integer(unsigned(buf_s_addr(8 downto 4)))).data(loop_counter) <= m_readdata;
+			mem_read_ready <= '1';
+				
+			if loop_counter = 0 then
+				-- reading complete, write tag
+				cache_body(to_integer(unsigned(buf_s_addr(8 downto 4)))).tag <= buf_s_addr(14 downto 9);
+				-- set valid flag
+				cache_body(to_integer(unsigned(buf_s_addr(8 downto 4)))).valid <= '1';
+				-- unset dirty flag
+				cache_body(to_integer(unsigned(buf_s_addr(8 downto 4)))).dirty <= '0';
+				-- change state
+				if s_read = '1' then
+					current_state <= read_return;
+				elsif s_write = '1' then
+					current_state <= cache_write;
+				end if;
+			else
+				loop_counter <= loop_counter - 1;
+			end if;
+		end if;
+	end if;
+
+	--------------------------------
+	-- Actual state machine stuff --
+	--------------------------------
+	if clock'event and clock = '1' then
+	
+		case current_state is 
+		when hit_check =>	-- default state
+		
+			if s_read = '1' or s_write = '1' then
+				s_waitrequest <= '0';
+
+				-- store address and data onto buffer, just to be safe
+				buf_s_addr <= s_addr;
+				buf_s_data <= s_writedata;
+				
+				-- addr_buf is used to access a block of memory. The least significant 4 bits are changed to access the next byte in each loop
+				addr_buf(31 downto 4) <= s_addr(31 downto 4);
+			
+				-- compare tag and check valid bit
+				if s_addr(14 downto 9) = cache_body(to_integer(unsigned(s_addr(8 downto 4)))).tag then
+					if cache_body(to_integer(unsigned(s_addr(8 downto 4)))).valid = '1' then
+						-- hit!
+						if s_read = '1' then
+							current_state <= read_return;	-- read & hit, return data
+
+						elsif s_write = '1' then
+							current_state <= cache_write;	-- write & hit
+
+						end if;
+						
+					else
+						-- same tag, invalid -> read from memory
+						m_write <= '0';
+						m_read <= '0';
+						loop_counter <= 3;
+						mem_read_ready <= '1';
+						current_state <= read_mem;
+						
+					end if;
+					
+				else -- different tag
+					if cache_body(to_integer(unsigned(s_addr(8 downto 4)))).valid = '1' and
+					cache_body(to_integer(unsigned(s_addr(8 downto 4)))).dirty = '1'then
+						-- if valid&dirty, writeback
+						-- write the address of the line to write back into the buffer
+						addr_buf(14 downto 9) <= cache_body(to_integer(unsigned(s_addr(8 downto 4)))).tag;
+						m_write <= '0';
+						m_read <= '0';
+						loop_counter <= 3;
+						flag_write <= '1';
+						current_state <= write_back;
+						
+					else
+						-- invalid, retrieve from memory
+						m_write <= '0';
+						m_read <= '0';
+						loop_counter <= 3;
+						mem_read_ready <= '1';
+						current_state <= read_mem;
+						
+					end if;
+
+				end if;
+			end if;
+			
+		when write_back =>	-- dirty line -> write back
+			-- count down if countdown flag is set
+			if flag_write = '1' then
+				if loop_counter = 0 then
+					flag_write <= '0';
+				else
+					loop_counter <= loop_counter - 1;
+				end if;
+			end if;
+
+			-- writing in progress & memory is not busy -> write one byte
+			if flag_write = '1' and m_waitrequest = '1' then
+				m_addr <= to_integer(unsigned(addr_buf(31 downto 0)));	-- m_addr takes a integer
+				m_writedata <= cache_body(to_integer(unsigned(buf_s_addr(8 downto 4)))).data(loop_counter);
+				m_write <= '1';
+				
+			-- flag is unset -> transition to the next state
+			elsif flag_write = '0' then
+				m_write <= '0';
+				-- reset stuff about looping
+				loop_counter <= 3;
+				-- write the correct address into othe address buffer
+				addr_buf(14 downto 9) <= buf_s_addr(14 downto 9);
+				-- transition to read_mem
+				current_state <= read_mem;
+			
+			end if;
+			
+		when read_mem =>
+			-- If the memory is ready to be accessed, read next byte
+			if m_waitrequest = '1' and mem_read_ready = '1' then
+				m_addr <= to_integer(unsigned(addr_buf(31 downto 0)));
+				m_read <= '1';
+				mem_read_ready <= '0';
+			end if;
+		
+		when read_return =>
+			-- put data on bus
+			s_readdata <= cache_body(to_integer(unsigned(buf_s_addr(8 downto 4)))).data(to_integer(unsigned(buf_s_addr(3 downto 2))));
+		
+			-- pull wait request high
+			s_waitrequest <= '1';
+
+			-- change state back to hit_check
+			current_state <= hit_check;
+			
+		when cache_write =>
+			-- write data into cache block
+			cache_body(to_integer(unsigned(buf_s_addr(8 downto 4)))).data(to_integer(unsigned(buf_s_addr(3 downto 2)))) <= buf_s_data;
+			-- mark cache block as dirty
+			cache_body(to_integer(unsigned(buf_s_addr(8 downto 4)))).dirty <= '1';
+		
+			-- pull wait request high
+			s_waitrequest <= '1';
+			
+			-- change state back to hit_check
+			current_state <= hit_check;
+			
+		end case;
+	end if;
 end process;
+		
 end arch;
