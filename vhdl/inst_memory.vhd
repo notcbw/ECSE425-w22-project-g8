@@ -51,7 +51,7 @@ BEGIN
 		--This is the actual synthesizable SRAM block
 		IF (clock'event AND clock = '1') THEN
 			IF (memwrite = '1') THEN
-				ram_block(address) <= writedata;
+				ram_block(to_integer(shift_right(to_unsigned(address, 32), 2))) <= writedata;
 			END IF;
 		
 		END IF;
@@ -60,7 +60,7 @@ BEGIN
 	process (memread)
 	begin
 		IF (memread = '1')THEN
-			readdata <= ram_block(address);
+			readdata <= ram_block(to_integer(shift_right(to_unsigned(address, 32), 2)));
 		END IF;	
 	end process;
 

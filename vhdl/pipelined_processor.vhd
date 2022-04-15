@@ -235,7 +235,7 @@ signal write_reg_w: std_logic_vector(4 downto 0);
 
 -- instruction memory avalon interface
 signal i_writedata: STD_LOGIC_VECTOR (31 DOWNTO 0);
-signal i_address: INTEGER RANGE 0 TO ram_size-1;
+signal i_address: INTEGER;
 signal i_memwrite: STD_LOGIC;
 signal i_memread: STD_LOGIC;
 signal i_readdata: STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -243,7 +243,7 @@ signal i_waitrequest: STD_LOGIC;
 
 -- data memory avalon interface
 signal d_writedata: STD_LOGIC_VECTOR (31 DOWNTO 0);
-signal d_address: INTEGER RANGE 0 TO ram_size-1;
+signal d_address: INTEGER;
 signal d_memwrite: STD_LOGIC;
 signal d_memread: STD_LOGIC;
 signal d_readdata: STD_LOGIC_VECTOR (31 DOWNTO 0);
