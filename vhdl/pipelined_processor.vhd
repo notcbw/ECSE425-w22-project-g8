@@ -185,28 +185,12 @@ component write_back is
 			);
 end component;
 
-component inst_memory is
+component main_memory is
 	GENERIC(
 		ram_size : INTEGER := 32768;
 		mem_delay : time := 10 ns;
-		clock_period : time := 1 ns
-	);
-	PORT (
-		clock: IN STD_LOGIC;
-		writedata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-		address: IN INTEGER RANGE 0 TO ram_size-1;
-		memwrite: IN STD_LOGIC;
-		memread: IN STD_LOGIC;
-		readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		waitrequest: OUT STD_LOGIC
-	);
-end component;
-
-component data_memory is
-	GENERIC(
-		ram_size : INTEGER := 32768;
-		mem_delay : time := 10 ns;
-		clock_period : time := 1 ns
+		clock_period : time := 1 ns;
+		log_time: time := 10000 ns
 	);
 	PORT (
 		clock: IN STD_LOGIC;
@@ -218,6 +202,58 @@ component data_memory is
 		waitrequest: OUT STD_LOGIC;
 		
 		write_to_text: in std_logic	-- set this high to write memory to file
+	);
+end component;
+
+component cache is
+    generic(
+        ram_size : INTEGER := 32768
+    );
+    port(
+        clock : in std_logic;
+        reset : in std_logic;
+        
+        -- Avalon interface --
+        s_addr : in std_logic_vector (31 downto 0);
+        s_read : in std_logic;
+        s_readdata : out std_logic_vector (31 downto 0);
+        s_write : in std_logic;
+        s_writedata : in std_logic_vector (31 downto 0);
+        s_waitrequest : out std_logic; 
+        
+        m_addr : out integer range 0 to ram_size-1;
+        m_read : out std_logic;
+        m_readdata : in std_logic_vector (7 downto 0);
+        m_write : out std_logic;
+        m_writedata : out std_logic_vector (7 downto 0);
+        m_waitrequest : in std_logic
+    );
+end component;
+
+component arbiter is
+	port(
+		clk: in std_logic;
+
+        i_writedata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		i_address: IN INTEGER;
+		i_memwrite: IN STD_LOGIC;
+		i_memread: IN STD_LOGIC;
+		i_readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+		i_waitrequest: OUT STD_LOGIC;
+
+        d_writedata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		d_address: IN INTEGER;
+		d_memwrite: IN STD_LOGIC;
+		d_memread: IN STD_LOGIC;
+		d_readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+		d_waitrequest: OUT STD_LOGIC;
+
+        m_writedata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+		m_address: OUT INTEGER := 0;
+		m_memwrite: OUT STD_LOGIC;
+		m_memread: OUT STD_LOGIC;
+		m_readdata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		m_waitrequest: IN STD_LOGIC
 	);
 end component;
 		
@@ -301,6 +337,9 @@ signal pc_ex_to_if: std_logic_vector(31 downto 0);
 signal mem_to_reg_m: std_logic;
 signal data_m: std_logic_vector(31 downto 0);
 signal alu_out_m: std_logic_vector(31 downto 0);
+
+signal nop: std_logic;
+signal nop_vector : in std_logic_vector (31 downto 0);
 
 begin
 	fet:fetch
@@ -455,18 +494,73 @@ begin
 		reg_write_out => reg_write_w
 		);
 		
-	ins: inst_memory
-	port map(
-		clock => clk,
-		writedata => i_writedata,
-		address => i_address,
-		memwrite => i_memwrite,
-		memread => i_memread,
-		readdata => i_readdata,
-		waitrequest => i_waitrequest
-		);
-		
-	dat: data_memory
+    inst_cache: cache
+    port map(
+        clock => clk,
+        reset => reset,
+
+        s_addr => i_address;
+        s_read => i_memread;
+        s_readdata => i_readdata;
+        s_write => nop;
+        s_writedata => nop_vector;
+        s_waitrequest => i_waitrequest; 
+        
+        m_addr : out integer range 0 to ram_size-1;
+        m_read : out std_logic;
+        m_readdata : in std_logic_vector (7 downto 0);
+        m_write : out std_logic;
+        m_writedata : out std_logic_vector (7 downto 0);
+        m_waitrequest : in std_logic
+    );
+
+    data_cache: cache
+    port map(
+        clock => clk,
+        reset => reset,
+
+        s_addr => i_address;
+        s_read => i_memread;
+        s_readdata => i_readdata;
+        s_write => nop;
+        s_writedata => nop_vector;
+        s_waitrequest => i_waitrequest; 
+        
+        m_addr : out integer range 0 to ram_size-1;
+        m_read : out std_logic;
+        m_readdata : in std_logic_vector (7 downto 0);
+        m_write : out std_logic;
+        m_writedata : out std_logic_vector (7 downto 0);
+        m_waitrequest : in std_logic
+    );
+
+    arb: arbiter
+    port map(
+        clk: in std_logic;
+
+        i_writedata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		i_address: IN INTEGER;
+		i_memwrite: IN STD_LOGIC;
+		i_memread: IN STD_LOGIC;
+		i_readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+		i_waitrequest: OUT STD_LOGIC;
+
+        d_writedata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		d_address: IN INTEGER;
+		d_memwrite: IN STD_LOGIC;
+		d_memread: IN STD_LOGIC;
+		d_readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+		d_waitrequest: OUT STD_LOGIC;
+
+        m_writedata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+		m_address: OUT INTEGER := 0;
+		m_memwrite: OUT STD_LOGIC;
+		m_memread: OUT STD_LOGIC;
+		m_readdata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+		m_waitrequest: IN STD_LOGIC
+    );
+
+	main: main_memory
 	port map(
 		clock => clk,
 		writedata => d_writedata,
