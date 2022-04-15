@@ -18,14 +18,14 @@ Willems, James
 | 2.4 | James |
 | 2.5 | Amine |
 | 2.6 | Krishna |
-| 2.7 | TBA |
-| 2.8 | TBA |
+| 2.7 | Team |
+| 2.8 | Team |
 | 3.1 | Kaan |
 | 3.2 | Bowen |
 | 3.3 | James |
 | 3.4 | Amine & Krishna |
-| Report | Everyone |
-| Bonus | Everyone |
+| Report | Team |
+| Bonus | Team |
 
 ## Execution
 In the console of ModelSim: 
