@@ -1,6 +1,8 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
+library std;
+use std.env.all;
 
 entity writeback_tb is
 end writeback_tb;
@@ -85,6 +87,8 @@ begin
         assert(write_data = x"FFFFBBBB") report "Mem data not passed via mux" severity failure;
 
         report "All writeback test completed";
+
+        stop;
 
     end process;
 
