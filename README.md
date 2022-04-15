@@ -27,4 +27,11 @@ Willems, James
 | Report | Everyone |
 | Bonus | Everyone |
 
+## Execution
+In the console of ModelSim: 
+```
+cd <root of the project>   
+source run.tcl  
+``
+
 

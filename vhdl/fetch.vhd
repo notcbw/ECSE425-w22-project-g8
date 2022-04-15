@@ -11,7 +11,7 @@ entity fetch is
 		branch_taken: in std_logic := '0';
         branch_addr: in std_logic_vector(31 DOWNTO 0);
 		pc: out std_logic_vector(31 DOWNTO 0);
-		s_addr_inst: out std_logic_vector(31 downto 0); -- send address to cache
+		s_addr_inst: out integer := 0; -- send address to cache
 		s_read_inst: out std_logic; -- send read signal to cache
 		inst: out std_logic_vector(31 downto 0); --  send instruction to ID
 		s_waitrequest_inst: in std_logic :='0'; -- get waitrequest signal from cache
@@ -43,7 +43,7 @@ entity fetch is
                     --s_addr_inst <= branch_addr;
                     
                 elsif (branch_taken = '0') and (stall = '0') and (s_waitrequest_inst = '0') then
-                    s_addr_inst <= pc_internal;
+                    s_addr_inst <= to_integer(unsigned(pc_internal));
                     s_read_inst <= '1';
                     pc_internal <= std_logic_vector(to_unsigned( to_integer(unsigned(pc_internal)) + 4,32));
                 else

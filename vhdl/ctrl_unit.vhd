@@ -86,6 +86,7 @@ begin
 					'1' when "001110",	-- xori
 					'1' when "001111",	-- lui
 					'1' when "100011",	-- lw
+					'1' when "000011",	-- jal
 					'0' when others;
 					
 	-- mem_to_reg, for all load instructions

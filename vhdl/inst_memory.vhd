@@ -5,7 +5,7 @@ USE ieee.numeric_std.all;
 use std.textio.all;
 use ieee.std_logic_textio.all;
 
-ENTITY data_memory IS
+ENTITY inst_memory IS
 	GENERIC(
 		ram_size : INTEGER := 32768;
 		mem_delay : time := 10 ns;
@@ -18,34 +18,38 @@ ENTITY data_memory IS
 		memwrite: IN STD_LOGIC;
 		memread: IN STD_LOGIC;
 		readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-		waitrequest: OUT STD_LOGIC;
-		
-		write_to_text: in std_logic	-- set this high to write memory to file
+		waitrequest: OUT STD_LOGIC
 	);
-END data_memory;
+END inst_memory;
 
-ARCHITECTURE rtl OF data_memory IS
+ARCHITECTURE rtl OF inst_memory IS
 	TYPE MEM IS ARRAY(ram_size-1 downto 0) OF STD_LOGIC_VECTOR(31 DOWNTO 0);
 	SIGNAL ram_block: MEM;
 	SIGNAL read_address_reg: INTEGER RANGE 0 to ram_size-1;
 	SIGNAL write_waitreq_reg: STD_LOGIC := '1';
 	SIGNAL read_waitreq_reg: STD_LOGIC := '1';
 BEGIN
+	--This is the main section of the SRAM model
 
-	process(write_to_text)
-		file data_memoryFile : text open write_mode is "data.txt";
-		variable outLine : line;	
-		variable rowLine : integer := 0;
+
+	process
+		file inst_file : text open read_mode is "program.txt";
+		variable read_line : line;	
+		variable row : integer := 0;
+		variable inst : std_logic_vector(31 downto 0);
 
 	begin
-		if write_to_text'event and write_to_text='1' then
-			while (rowLine < ram_size) loop 
-				write(outLine, ram_block(rowLine));		-- choose line to write
-				writeline(data_memoryFile, outLine);	-- write word to line
-				rowLine := rowLine + 1;
-			end loop;
-		end if;	
+		while not endfile(inst_file) loop 
+			readline(inst_file, read_line);	-- read one line of instruction
+			read(read_line, inst);	-- read line to a 32-bit vector
+			ram_block(row) <= inst;	-- write 32-bit vector to its position in memory
+			row := row + 1;
+		end loop;
+		file_close(inst_file);
+		wait;
 	end process;
+	--This is the main section of the SRAM model
+
 
 	mem_process: PROCESS (clock)
 	BEGIN

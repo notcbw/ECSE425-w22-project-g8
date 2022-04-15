@@ -8,7 +8,8 @@ entity decode is
 			stall_d: in std_logic;						-- input to stall decode, active high
 			inst: in std_logic_vector(31 downto 0);
 			reg_dst: in std_logic;		-- from the control unit, 1 if writeback to Rd, 0 if Rt
-			jump: in std_logic;			-- from the control unit, 1 if it's a jump instruction	
+			jump: in std_logic;			-- from the control unit, 1 if it's a jump instruction
+			link: in std_logic;
 			sign_ext: in std_logic;		-- from the control unit. 1 if sign extend, 0 if zero extend
 			reg_write_e: in std_logic;
 			write_reg_e: in std_logic_vector(4 downto 0);
@@ -46,8 +47,10 @@ begin
 				(x"ffff" & inst_buf(15 downto 0)) when ((jump='0') and (sign_ext='1') and (inst_buf(15)='1')) else -- sign ext negative
 				(x"0000" & inst_buf(15 downto 0));
 	
-	-- switching between two writeback addresses
-	write_reg_out <= inst_buf(15 downto 11) when reg_dst='1' else inst_buf(20 downto 16);
+	-- switching between link register and two writeback addresses
+	write_reg_out <= 	"11111" when link='1' else
+						inst_buf(15 downto 11) when reg_dst='1' else 
+						inst_buf(20 downto 16);
 	
 	-- asynchronous forwarding logic
 	-- hazard detection
