@@ -10,22 +10,19 @@ Mallek, Amine
 Willems, James  
 
 ## Task distribution
-| Task | Assignee |
-| ---- | -------- |
-| 2.1 | Amine |
-| 2.2 | Kaan |
-| 2.3 | Bowen |
-| 2.4 | James |
-| 2.5 | Amine |
-| 2.6 | Krishna |
-| 2.7 | Team |
-| 2.8 | Team |
-| 3.1 | Kaan |
-| 3.2 | Bowen |
-| 3.3 | James |
-| 3.4 | Amine & Krishna |
-| Report | Team |
-| Bonus | Team |
+| Task                     | Assignee |
+| ------------------------ | -------- |
+| 2.1 - Data_Memory        | Amine    |
+| 2.2 - Fetch              | Kaan     |
+| 2.3 - Decode             | Bowen    |
+| 2.4 - Execute            | James    |
+| 2.5 - Memory             | Amine    |
+| 2.6 - Write_Back         | Krishna  |
+| 2.7 - Pipelined_Processor| Team     |
+| 2.8 - Testbench          | Team     |
+| 3.1 - Unit Tests         | Team     |
+| Writing Report           | Team     |
+| Bonus Task: Caching      | Team     |
 
 ## Execution
 Put the compiled program.txt in the root folder, then in the console of ModelSim: 
