@@ -9,7 +9,8 @@ ENTITY data_memory IS
 	GENERIC(
 		ram_size : INTEGER := 32768;
 		mem_delay : time := 10 ns;
-		clock_period : time := 1 ns
+		clock_period : time := 1 ns;
+		log_time: time := 10000 ns
 	);
 	PORT (
 		clock: IN STD_LOGIC;
@@ -31,23 +32,10 @@ ARCHITECTURE rtl OF data_memory IS
 	SIGNAL write_waitreq_reg: STD_LOGIC := '1';
 	SIGNAL read_waitreq_reg: STD_LOGIC := '1';
 BEGIN
-
-	process(write_to_text)
-		file data_memoryFile : text open write_mode is "data.txt";
+	mem_process: PROCESS (clock)
+		file data_memoryFile : text;
 		variable outLine : line;	
 		variable rowLine : integer := 0;
-
-	begin
-		if write_to_text'event and write_to_text='1' then
-			while (rowLine < ram_size) loop 
-				write(outLine, ram_block(rowLine));		-- choose line to write
-				writeline(data_memoryFile, outLine);	-- write word to line
-				rowLine := rowLine + 1;
-			end loop;
-		end if;	
-	end process;
-
-	mem_process: PROCESS (clock)
 	BEGIN
 		--This is a cheap trick to initialize the SRAM in simulation
 		IF(now < 1 ps)THEN
@@ -55,7 +43,18 @@ BEGIN
 				ram_block(i) <= std_logic_vector(to_unsigned(0,32));
 			END LOOP;
 		end if;
-
+		
+		-- writes content to log after threshold has passed
+		if now = log_time then
+			file_open(data_memoryFile, "data.txt", write_mode);
+			while (rowLine < ram_size) loop 
+				write(outLine, ram_block(rowLine));		-- choose line to write
+				writeline(data_memoryFile, outLine);	-- write word to line
+				rowLine := rowLine + 1;
+			end loop;
+			file_close(data_memoryFile);
+		end if;
+		
 		--This is the actual synthesizable SRAM block
 		IF (clock'event AND clock = '1') THEN
 			IF (memwrite = '1') THEN

@@ -30,21 +30,20 @@ entity fetch is
     begin
 		pc <= pc_internal;
 		
-        process(clk, s_waitrequest_inst)
+        process(clk, branch_taken, s_waitrequest_inst)
         begin
+			if branch_taken'event and branch_taken='1' then
+				pc_internal <= branch_addr;
+			end if;
+			
             if clk'event and clk='1' then
                 if (reset = '1') then
                     pc_internal <= std_logic_vector(pc_reset);
                 end if;
-
-				if (branch_taken = '1') then
-                    pc_internal <= branch_addr;
-                    --s_addr_inst <= branch_addr;
-                end if;
                 
                 if state='0' then
 					if (stall = '1') then
-						-- inst <= x"00000020"; -- stall by sending 0+0=0
+						 inst <= x"00000020"; -- stall by sending 0+0=0
 					elsif (stall = '0') and (s_waitrequest_inst = '1') then
 						s_addr_inst <= to_integer(unsigned(pc_internal));
 						s_read_inst <= '1';
@@ -53,6 +52,8 @@ entity fetch is
 					else
 						inst <= x"00000020"; -- stall by sending 0+0=0
 					end if;
+				else 
+					inst <= x"00000020";
 				end if;
             end if;
 

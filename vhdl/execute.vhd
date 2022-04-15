@@ -30,7 +30,7 @@ entity execute is
 	    WB_register_out: out std_logic_vector(4 downto 0); -- outputs reg number
 	    write_data_out: out std_logic_vector(31 downto 0);
 	    alu_result_out: out std_logic_vector(31 downto 0);
-		pc_write: out std_logic;
+		pc_write: out std_logic := '0';
 	    PC_out : out std_logic_vector(31 downto 0)
 	    );
  end entity;
