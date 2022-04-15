@@ -18,6 +18,7 @@ architecture behaviour of decode_tb is
 				inst: in std_logic_vector(31 downto 0);
 				reg_dst: in std_logic;		-- from the control unit, 1 if writeback to Rd, 0 if Rt
 				jump: in std_logic;			-- from the control unit, 1 if it's a jump instruction	
+				link: in std_logic;
 				sign_ext: in std_logic;		-- from the control unit. 1 if sign extend, 0 if zero extend
 				reg_write_e: in std_logic;
 				write_reg_e: in std_logic_vector(4 downto 0);
@@ -131,6 +132,7 @@ begin
 		inst => inst,
 		reg_dst => reg_dst,
 		jump => jump,
+		link => link,
 		sign_ext => sign_ext,
 		reg_write_e => reg_write_e,
 		write_reg_e => write_reg_e,
