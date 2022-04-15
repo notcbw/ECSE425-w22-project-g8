@@ -339,7 +339,7 @@ signal data_m: std_logic_vector(31 downto 0);
 signal alu_out_m: std_logic_vector(31 downto 0);
 
 signal nop: std_logic;
-signal nop_vector : in std_logic_vector (31 downto 0);
+signal nop_vector : std_logic_vector (31 downto 0);
 
 -- arbiter
 signal ai_writedata: STD_LOGIC_VECTOR (31 DOWNTO 0);
