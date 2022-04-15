@@ -40,7 +40,7 @@ architecture rtl of memory is
 	signal cur_state: state_type;
 begin
 	stall <= '0' when cur_state=default_state else '1';
-	process(clk)
+	process(clk, m_waitrequest)
 	begin
 		if clk'event and clk='1' then
 			case cur_state is
@@ -67,22 +67,31 @@ begin
 						m_write <= '1';
 						cur_state <= wait_for_write;
 					end if;
+				when wait_for_read =>
+					-- do nothing 
+					
+				when wait_for_write =>
+					-- do nothing
+					
+			end case;
+		end if;
+		
+		if m_waitrequest'event and m_waitrequest='1' then
+			case cur_state is
+				when default_state =>
+					-- do nothing
 					
 				when wait_for_read =>
-					if m_waitrequest='1' then
-						-- read complete
-						m_read <= '0';
-						data_out <= m_readdata;
-						cur_state <= default_state;
-					end if;
-				
+					-- read complete
+					m_read <= '0';
+					data_out <= m_readdata;
+					cur_state <= default_state;
+					
 				when wait_for_write =>
-					if m_waitrequest='1' then
-						-- write complete
-						m_write <= '0';
-						cur_state <= default_state;
-					end if;
-						
+					-- write complete
+					m_write <= '0';
+					cur_state <= default_state;
+					
 			end case;
 		end if;
 	end process;

@@ -62,6 +62,7 @@ begin
 	process(clk)
 	begin
 		if clk'event and clk='1' then
+			stall_out <= stall;
 			reg_write_out <= reg_write;
 			Mem2Reg_out <= Mem2Reg;
 			MemWrite_out <= MemWrite;

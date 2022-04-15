@@ -261,7 +261,7 @@ signal s_waitrequest_inst: std_logic;
 signal s_readdata_inst: std_logic_vector(31 downto 0);
 
 -- decode
-signal stall_d: std_logic := '0';
+signal stall_d: std_logic;
 signal reg_dst: std_logic;
 signal jump: std_logic;
 signal sign_ext: std_logic;	

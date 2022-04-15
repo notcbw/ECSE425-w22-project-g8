@@ -30,34 +30,22 @@ ARCHITECTURE rtl OF inst_memory IS
 	SIGNAL read_waitreq_reg: STD_LOGIC := '1';
 BEGIN
 	--This is the main section of the SRAM model
-
-
-	process
-		file inst_file : text open read_mode is "program.txt";
+	mem_process: PROCESS (clock)
+		file inst_file : text;
 		variable read_line : line;	
 		variable row : integer := 0;
 		variable inst : std_logic_vector(31 downto 0);
-
-	begin
-		while not endfile(inst_file) loop 
-			readline(inst_file, read_line);	-- read one line of instruction
-			read(read_line, inst);	-- read line to a 32-bit vector
-			ram_block(row) <= inst;	-- write 32-bit vector to its position in memory
-			row := row + 1;
-		end loop;
-		file_close(inst_file);
-		wait;
-	end process;
-	--This is the main section of the SRAM model
-
-
-	mem_process: PROCESS (clock)
 	BEGIN
 		--This is a cheap trick to initialize the SRAM in simulation
 		IF(now < 1 ps)THEN
-			For i in 0 to ram_size-1 LOOP
-				ram_block(i) <= std_logic_vector(to_unsigned(0,32));
-			END LOOP;
+			file_open(inst_file, "program.txt", read_mode);
+			while not endfile(inst_file) loop 
+				readline(inst_file, read_line);	-- read one line of instruction
+				read(read_line, inst);	-- read line to a 32-bit vector
+				ram_block(row) <= inst;	-- write 32-bit vector to its position in memory
+				row := row + 1;
+			end loop;
+			file_close(inst_file);
 		end if;
 
 		--This is the actual synthesizable SRAM block

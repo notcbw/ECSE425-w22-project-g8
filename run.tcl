@@ -6,6 +6,7 @@ proc AddWaves {} {
 	add wave -position end sim:/processor/i_memread
 	add wave -position end sim:/processor/i_waitrequest
 	add wave -position end sim:/processor/i_readdata
+	add wave -position end sim:/processor/stall_f
 	
 	add wave -position end sim:/processor/inst
 	add wave -position end sim:/processor/fwd1
@@ -17,6 +18,7 @@ proc AddWaves {} {
 	add wave -position end sim:/processor/link
 	add wave -position end sim:/processor/pc_id_to_ex
 	add wave -position end sim:/processor/imm_out
+	add wave -position end sim:/processor/stall_d
 	
 	add wave -position end sim:/processor/reg_write_e
 	add wave -position end sim:/processor/write_reg_e

@@ -54,18 +54,18 @@ begin
 	
 	-- asynchronous forwarding logic
 	-- hazard detection
-	wait_dd <=	'1' when	((reg_write_e='1') and	-- hazard detection, stall if detected
-							(write_reg_e=inst_buf(25 downto 21) or write_reg_e=inst_buf(20 downto 16)) and 
-							(jump='0')) else '0';
+	--wait_dd <=	'1' when	((reg_write_e='1') and	-- hazard detection, stall if detected
+							--(write_reg_e=inst_buf(25 downto 21) or write_reg_e=inst_buf(20 downto 16)) and 
+							--(jump='0')) else '0';
 							
 	-- forwarding
-	fwd1_out <=	'1' when	((reg_write_m='1') and
-							(write_reg_m=inst_buf(25 downto 21)) and
-							(jump='0')) else '0';
+	--fwd1_out <=	'1' when	((reg_write_m='1') and
+							--(write_reg_m=inst_buf(25 downto 21)) and
+							--(jump='0')) else '0';
 							
-	fwd2_out <=	'1' when	((reg_write_m='1') and
-							(write_reg_m=inst_buf(20 downto 16)) and
-							(jump='0')) else '0';
+	--fwd2_out <=	'1' when	((reg_write_m='1') and
+							--(write_reg_m=inst_buf(20 downto 16)) and
+							--(jump='0')) else '0';
 	
 	-- main synchronous decoding process
 	decode: process(clk)
@@ -80,6 +80,40 @@ begin
 				a2_out <= inst(20 downto 16);
 				pc_out <= pc_in;
 				inst_buf <= inst;
+			end if;
+			
+			if jump='0' then
+				-- if there is a data hazard, stall
+				if reg_write_e='1' then
+					-- check for data dependency
+					if (write_reg_e=inst(25 downto 21)) or (write_reg_e=inst(20 downto 16)) then
+						-- data dependency detected, wait
+						wait_dd <= '1';
+					else
+						wait_dd <= '0';
+					end if;
+				end if;
+
+				-- resolving the data hazard, resume pipeline
+				if reg_write_m='1' then
+					-- forwarding for rd1
+					if (write_reg_m=inst(25 downto 21)) then
+						-- change rd1 mux output and stop waiting
+						fwd1_out <= '1';
+						wait_dd <= '0';
+					else
+						fwd1_out <= '0';
+					end if;
+					-- forwarding for rd2
+					if (write_reg_m=inst(20 downto 16)) then
+						-- change rd2 mux output and stop waiting
+						fwd2_out <= '1';
+						wait_dd <= '0';
+					else
+						fwd2_out <= '0';
+					end if;
+				end if;
+				
 			end if;
 			
 		end if;
