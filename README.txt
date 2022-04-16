@@ -1,3 +1,7 @@
+Please use the "Base_Processor" project directory to test the unoptimized piplined processor.
+
+Please use the "Cached_Processor" project directory to test the cache optimized pipelined processor. The "Cached_Processor" is mostly operational but has not been thoroughly tested unlike the "Base_Processor".
+
 How to run the code:
 
 1) Place the assembled program file into the project directory (the run.tcl file should be in that same directory)
