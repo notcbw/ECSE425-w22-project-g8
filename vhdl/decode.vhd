@@ -71,9 +71,7 @@ begin
 	decode: process(clk)
 	begin
 		if clk'event and clk='1' then
-			-- instruction decoding logic, affected by stalling
-			--if (wait_dd='0') then
-				-- simple decoding
+			-- instruction decoding logic
 				op <= inst(31 downto 26);
 				funct <= inst(5 downto 0);
 				a1_out <= inst(25 downto 21);
@@ -81,42 +79,6 @@ begin
 				pc_out <= pc_in;
 				inst_buf <= inst;
 				stall_f <= stall_d;
-			--end if;
-			
-			--~ if jump='0' then
-				-- if there is a data hazard, stall
-				--~ if reg_write_e='1' then
-					--~ -- check for data dependency
-					--~ if ((write_reg_e=inst(25 downto 21)) or (write_reg_e=inst(20 downto 16))) then
-						--~ -- data dependency detected, wait
-						--~ wait_dd <= '1';
-					--~ else
-						--~ wait_dd <= '0';
-					--~ end if;
-				--~ end if;
-
-				--~ -- resolving the data hazard, resume pipeline
-				--~ if reg_write_m='1' then
-					--~ -- forwarding for rd1
-					--~ if write_reg_m=inst(25 downto 21) then
-						--~ -- change rd1 mux output and stop waiting
-						--~ fwd1_out <= '1';
-						--~ wait_dd <= '0';
-					--~ else
-						--~ fwd1_out <= '0';
-					--~ end if;
-					--~ -- forwarding for rd2
-					--~ if write_reg_m=inst(20 downto 16) then
-						--~ -- change rd2 mux output and stop waiting
-						--~ fwd2_out <= '1';
-						--~ wait_dd <= '0';
-					--~ else
-						--~ fwd2_out <= '0';
-					--~ end if;
-				--~ end if;
-				
-			--~ end if;
-			
 		end if;
 	end process;
 	
