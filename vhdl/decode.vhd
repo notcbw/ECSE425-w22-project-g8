@@ -38,7 +38,7 @@ architecture rtl of decode is
 	signal inst_buf: std_logic_vector(31 downto 0);
 begin
 	-- stall fetch if either decode is waiting for data dependency, or the next stages are stopped
-	stall_f <= wait_dd or stall_d;
+	-- stall_f <= wait_dd or stall_d;
 	aw_out <= write_reg_w;
 	we_out <= reg_write_w;
 	
@@ -80,6 +80,7 @@ begin
 				a2_out <= inst(20 downto 16);
 				pc_out <= pc_in;
 				inst_buf <= inst;
+				stall_f <= stall_d;
 			--end if;
 			
 			--~ if jump='0' then
